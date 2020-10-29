@@ -1,9 +1,14 @@
-module SecureTcp where
+module SecureTcp
+  ( encodeCopy,
+    decodeCopy,
+    SecureSocket (..),
+  )
+where
 
 import Control.Monad.IO.Class (MonadIO)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
-import Encrypt
+import Encrypt ( Cipher, encode, decode )
 import Network.Simple.TCP
 
 data SecureSocket = SecureSocket Cipher Socket deriving (Show)
