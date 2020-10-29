@@ -1,12 +1,26 @@
-module Cipher where
+module Encrypt(
+    encode,
+    decode,
+    newCipher,
+    Cipher(..),
+    randPwd
+) where
 
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import Data.Word (Word8)
 import qualified Data.Word as W
 import Data.List (sortBy)
+import System.Random (newStdGen)
+import System.Random.Shuffle (shuffle')
 
 data Cipher = Cipher {encodePwd :: ByteString, decodePwd :: ByteString} deriving (Show)
+
+randPwd :: IO ByteString
+randPwd = do
+  rng <- newStdGen
+  let xs = [0..255] :: [Word8]
+  return $ B.pack $ shuffle' xs (length xs) rng
 
 get :: Word8 -> ByteString -> Word8
 get 0 x = B.head x
