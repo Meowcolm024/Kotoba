@@ -25,6 +25,8 @@ dependencies:
 - random-shuffle 
 - network-simple 
 - bytestring
+- network
+- socks
 
 library:
   source-dirs: src

@@ -4,6 +4,7 @@ module Encrypt
     newCipher,
     Cipher (..),
     randPwd,
+    seedPwd
   )
 where
 
@@ -12,16 +13,16 @@ import qualified Data.ByteString as B
 import Data.List (sortBy)
 import Data.Word (Word8)
 import qualified Data.Word as W
-import System.Random (newStdGen)
+import System.Random (newStdGen, mkStdGen)
 import System.Random.Shuffle (shuffle')
 
 data Cipher = Cipher {encodePwd :: ByteString, decodePwd :: ByteString} deriving (Show)
 
 randPwd :: IO ByteString
-randPwd = do
-  rng <- newStdGen
-  let xs = [0 .. 255] :: [Word8]
-  return $ B.pack $ shuffle' xs (length xs) rng
+randPwd = B.pack . shuffle' [0 .. 255] 256 <$> newStdGen
+
+seedPwd :: Int -> ByteString
+seedPwd = B.pack . shuffle' [0 .. 255] 256 . mkStdGen
 
 get :: Word8 -> ByteString -> Word8
 get 0 x = B.head x

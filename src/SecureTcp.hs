@@ -8,7 +8,7 @@ where
 import Control.Monad.IO.Class (MonadIO)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
-import Encrypt ( Cipher, encode, decode )
+import Encrypt (Cipher, decode, encode)
 import Network.Simple.TCP
 
 data SecureSocket = SecureSocket Cipher Socket deriving (Show)

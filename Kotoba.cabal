@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a41ee4a4c059c1ca91974f0a718f6b7ce4292f46a6190c1760eab13668863c4e
+-- hash: 445bcaa58315d7909997bc20c522fe0249603aad39e00e51bb7aff736f022a16
 
 name:           Kotoba
 version:        0.1.0.0
@@ -29,9 +29,9 @@ library
   exposed-modules:
       Encrypt
       Lib
-      Local
+      LocalTest
       SecureTcp
-      Server
+      ServerTest
   other-modules:
       Paths_Kotoba
   hs-source-dirs:
@@ -39,14 +39,18 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , network
     , network-simple
     , random
     , random-shuffle
+    , socks
   default-language: Haskell2010
 
 executable Kotoba-exe
   main-is: Main.hs
   other-modules:
+      Local
+      Server
       Paths_Kotoba
   hs-source-dirs:
       app
@@ -55,9 +59,11 @@ executable Kotoba-exe
       Kotoba
     , base >=4.7 && <5
     , bytestring
+    , network
     , network-simple
     , random
     , random-shuffle
+    , socks
   default-language: Haskell2010
 
 test-suite Kotoba-test
@@ -72,7 +78,9 @@ test-suite Kotoba-test
       Kotoba
     , base >=4.7 && <5
     , bytestring
+    , network
     , network-simple
     , random
     , random-shuffle
+    , socks
   default-language: Haskell2010
