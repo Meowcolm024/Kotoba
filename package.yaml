@@ -27,6 +27,7 @@ dependencies:
 - bytestring
 - network
 - socks
+- http-conduit
 
 library:
   source-dirs: src

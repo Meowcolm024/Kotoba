@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 445bcaa58315d7909997bc20c522fe0249603aad39e00e51bb7aff736f022a16
+-- hash: a3125dd48fcea0d19b32506878eddfd6e18b03972edc32241601ede0b8952c50
 
 name:           Kotoba
 version:        0.1.0.0
@@ -39,6 +39,7 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , http-conduit
     , network
     , network-simple
     , random
@@ -59,6 +60,7 @@ executable Kotoba-exe
       Kotoba
     , base >=4.7 && <5
     , bytestring
+    , http-conduit
     , network
     , network-simple
     , random
@@ -78,6 +80,7 @@ test-suite Kotoba-test
       Kotoba
     , base >=4.7 && <5
     , bytestring
+    , http-conduit
     , network
     , network-simple
     , random
