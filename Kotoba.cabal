@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a3125dd48fcea0d19b32506878eddfd6e18b03972edc32241601ede0b8952c50
+-- hash: d7cf4d3776bd7b97b4595f5846684bfa9c815e096b265ddf3813b9c02370a87f
 
 name:           Kotoba
 version:        0.1.0.0
@@ -29,9 +29,9 @@ library
   exposed-modules:
       Encrypt
       Lib
-      LocalTest
+      Local
       SecureTcp
-      ServerTest
+      Server
   other-modules:
       Paths_Kotoba
   hs-source-dirs:
@@ -50,8 +50,6 @@ library
 executable Kotoba-exe
   main-is: Main.hs
   other-modules:
-      Local
-      Server
       Paths_Kotoba
   hs-source-dirs:
       app
