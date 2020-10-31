@@ -9,15 +9,6 @@ import Encrypt (newCipher)
 import Network.Simple.TCP
 import SecureTcp
 
-local :: IO ()
-local = sendbytes [0 .. 3]
-
-sendbytes :: [Word8] -> IO ()
-sendbytes xs =
-  connect "127.0.0.1" "8000" $ \(connectionSocket, remoteAddr) -> do
-    encodeCopy (SecureSocket c connectionSocket) (B.pack xs)
-    putStrLn $ "Connection established to " ++ show remoteAddr
-
 runServer :: IO ()
 runServer =
   serve (Host "127.0.0.1") "8000" $ \(connectionSocket, remoteAddr) -> do
@@ -35,5 +26,4 @@ returnLocal ci dt hn hp =
     encodeCopy (SecureSocket ci connectionSocket) dt
 
 pwd = B.pack $ reverse [0 .. 255]
-
 c = newCipher pwd
