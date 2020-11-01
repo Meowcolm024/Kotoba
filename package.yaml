@@ -26,7 +26,6 @@ dependencies:
 - network-simple 
 - bytestring
 - network
-- socks
 - http-conduit
 
 library:

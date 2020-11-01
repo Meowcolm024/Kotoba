@@ -10,37 +10,34 @@ import Data.Char (chr)
 import Data.Word (Word8)
 import Encrypt (Cipher, newCipher)
 import Network.Simple.TCP
-import Network.Socket (SockAddr (SockAddrUnix))
 import SecureTcp
 
 runLocal :: IO ()
 runLocal =
   serve (Host "127.0.0.1") "1080" $ \(connectionSocket, remoteAddr) -> do
     x <- recv connectionSocket 64
-    print (B.unpack <$> x)
+    -- print (B.unpack <$> x)
 
     send connectionSocket (B.pack [0x05, 0x00])
     t <- recv connectionSocket 1024
-    print t
+    -- print t
 
     case t of
       Nothing -> return ()
       Just t' -> do
-        let (tAddr, tPort) = getADDR ((B.unpack t') !! 3) t'
+        let (dstAddr, dstPort) = getADDR ((B.unpack t') !! 3) t'
         send connectionSocket (B.pack [0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
-        print tAddr
+        print (bs2addr dstAddr, bs2port dstPort)
 
         h <- recv connectionSocket 1024
-        putStrLn $ "REQUEST: " ++ show h
+        -- putStrLn $ "REQUEST: " ++ show h
 
         case h of
           Nothing -> return ()
           Just h' -> do
-            putStrLn $ b2s h'
             
-            -- content <- doReq h' (b2s tAddr) (b2s tPort)
-            content <- dialServer c h' ("127.0.0.1", "8000") ("127.0.0.1", "4000")
-            print content
+            content <- doReq h' (bs2addr dstAddr) (bs2port dstPort)
+            -- content <- dialServer c h' ("127.0.0.1", "8000") ("127.0.0.1", "4000")
 
             case content of
               Nothing -> return ()
@@ -64,9 +61,9 @@ dialServer ci dt (rhn, rhp) (lhn, lhp) = do
     accept connectionSocket $ \(connectionSocket', _) -> do
       decodeCopy (SecureSocket ci connectionSocket') :: MonadIO m => m (Maybe ByteString)
 
-doReq dt dstAddr dstPort = do
+doReq requests dstAddr dstPort = do
   connect dstAddr dstPort $ \(connectionSocket, _) -> do
-    send connectionSocket dt
+    send connectionSocket requests
     getBack connectionSocket
 
 getBack :: MonadIO m => Socket -> m (Maybe ByteString)
@@ -81,5 +78,8 @@ getBack sSocket = do
 pwd = B.pack $ reverse [0 .. 255]
 c = newCipher pwd
 
-b2s :: ByteString -> String
-b2s = map (chr . fromEnum) . B.unpack
+bs2addr :: ByteString -> String
+bs2addr = map (chr . fromEnum) . B.unpack
+
+bs2port :: ByteString -> String
+bs2port = dropWhile (=='0') . concatMap (show . fromEnum) . B.unpack
