@@ -2,47 +2,36 @@
 
 module Local where
 
-import Control.Monad.IO.Class (MonadIO)
 import Data.Bifunctor (Bifunctor (bimap))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import Data.Char (chr)
 import Data.Word (Word8)
-import Encrypt (Cipher, newCipher)
 import Network.Simple.TCP
-import SecureTcp
 
 runLocal :: IO ()
 runLocal =
   serve (Host "127.0.0.1") "1080" $ \(connectionSocket, remoteAddr) -> do
     x <- recv connectionSocket 64
-    -- print (B.unpack <$> x)
-
+    print (B.unpack <$> x)
+    -- respond connection
     send connectionSocket (B.pack [0x05, 0x00])
     t <- recv connectionSocket 1024
-    -- print t
-
     case t of
       Nothing -> return ()
       Just t' -> do
+        -- get true dst address and port
         let (dstAddr, dstPort) = getADDR ((B.unpack t') !! 3) t'
-        send connectionSocket (B.pack [0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        -- respond success connection
+        send connectionSocket $ B.pack [0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         print (bs2addr dstAddr, bs2port dstPort)
-
-        h <- recv connectionSocket 1024
-        -- putStrLn $ "REQUEST: " ++ show h
-
-        case h of
+        -- getting full http request
+        request <- recv connectionSocket 2048
+        case request of
           Nothing -> return ()
-          Just h' -> do
-            
-            content <- doReq h' (bs2addr dstAddr) (bs2port dstPort)
-            -- content <- dialServer c h' ("127.0.0.1", "8000") ("127.0.0.1", "4000")
-
-            case content of
-              Nothing -> return ()
-              Just content' ->
-                send connectionSocket content'
+          Just req ->
+            -- return result
+            doReq req connectionSocket (bs2addr dstAddr) (bs2port dstPort)
 
     putStrLn $ "TCP connection established from " ++ show remoteAddr
 
@@ -54,32 +43,21 @@ getADDR t x = bimap B.pack B.pack $ go ([], f t s)
     go (p, [a, b]) = (p, [a, b])
     go (a, (b : bs)) = go (a ++ [b], bs)
 
-dialServer ci dt (rhn, rhp) (lhn, lhp) = do
-  connect rhn rhp $ \(connectionSocket, _) -> do
-    encodeCopy (SecureSocket ci connectionSocket) dt
-  listen lhn lhp $ \(connectionSocket, _) -> do
-    accept connectionSocket $ \(connectionSocket', _) -> do
-      decodeCopy (SecureSocket ci connectionSocket') :: MonadIO m => m (Maybe ByteString)
+doReq :: ByteString -> Socket -> HostName -> ServiceName -> IO ()
+doReq requests local dstAddr dstPort =
+  connect dstAddr dstPort $ \(dstSocket, _) -> do
+    send dstSocket requests
+    retrieve dstSocket local
 
-doReq requests dstAddr dstPort = do
-  connect dstAddr dstPort $ \(connectionSocket, _) -> do
-    send connectionSocket requests
-    getBack connectionSocket
-
-getBack :: MonadIO m => Socket -> m (Maybe ByteString)
-getBack sSocket = do
-  result <- recv sSocket 1024
-  if result == Nothing
-    then return . return $ B.empty
-    else do
-      rest <- getBack sSocket
-      return $ B.append <$> result <*> rest
-
-pwd = B.pack $ reverse [0 .. 255]
-c = newCipher pwd
+retrieve :: Socket -> Socket -> IO ()
+retrieve remote local = do
+  result <- recv remote 4096
+  case result of
+    Nothing -> return ()
+    Just r -> send local r >> retrieve remote local
 
 bs2addr :: ByteString -> String
 bs2addr = map (chr . fromEnum) . B.unpack
 
 bs2port :: ByteString -> String
-bs2port = dropWhile (=='0') . concatMap (show . fromEnum) . B.unpack
+bs2port = dropWhile (== '0') . concatMap (show . fromEnum) . B.unpack

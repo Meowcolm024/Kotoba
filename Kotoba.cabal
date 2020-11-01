@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f0d2ec430fd4c00b9ac6a452b43a8e5f31455600c86dce849529c8e72de2b126
+-- hash: 1daeef56bb521659f61bbc5c04fad3f25a5c1fcebe68cbb9df1c0a6b36a397e2
 
 name:           Kotoba
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Local
       SecureTcp
       Server
+      Util
   other-modules:
       Paths_Kotoba
   hs-source-dirs:
